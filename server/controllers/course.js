@@ -3,6 +3,8 @@ const multer = require('multer')
 const router = express.Router()
 const { models } = require('../models')
 const path = require('path')
+const iconv = require('iconv-lite');
+
 // const storage = multer.memoryStorage({
 //   destination(req, file, callback) {
 //       callback(null, '')
@@ -14,7 +16,8 @@ const storage = multer.diskStorage({
     return cb(null, 'uploads/')
   },
   filename: function (req, file, cb) {
-    return cb(null, `${Date.now()}_${file.originalname}`)
+    const fileName = iconv.encode(file.originalname, 'ISO-8859-1').toString();
+    return cb(null, `${Date.now()}_${fileName}`)
   }
 })
 
@@ -22,21 +25,18 @@ const upload = multer({
   storage,
   limits: {
       fileSize: 2000000},
-  // fileFilter(req, file, callback) {
-  //     checkFileType(file, callback)
-  // }
 })  
 
 router.post('/upload', upload.single('file'), async (req, res) => {
-    try {
-        const { name, prepare, price } = req.body
-        const fileName = req.file.filename
-        console.log('fileName', fileName)
-        const course = await models.Course.create({ name, prepare, price, file:fileName })
-        res.status(200).json(course)
-    } catch (error) {
-        res.status(500).json({ message: error.message })
-    }
+  try {
+      const { name, prepare, price } = req.body
+      let fileName = req.file.filename
+      console.log('fileName', fileName)
+      const course = await models.Course.create({ name, prepare, price, file:fileName })
+      res.status(200).json(course)
+  } catch (error) {
+      res.status(500).json({ message: error.message })
+  }
 })
 
 router.get('/download/:filename', async (req, res) => {
