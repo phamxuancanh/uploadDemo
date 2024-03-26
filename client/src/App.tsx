@@ -95,6 +95,7 @@ function App() {
       <table className="table" border={1}>
         <thead>
           <tr>
+            <th>ID</th>
             <th>Name</th>
             <th>Prepare</th>
             <th>Price</th>
@@ -104,6 +105,7 @@ function App() {
         <tbody>
           {courses.map((course) => (
             <tr key={course.id}>
+              <td>{course.id}</td>
               <td>{course.name}</td>
               <td>{course.prepare}</td>
               <td>{course.price}</td>
