@@ -3,13 +3,7 @@ const multer = require('multer')
 const router = express.Router()
 const { models } = require('../models')
 const path = require('path')
-const iconv = require('iconv-lite');
-
-// const storage = multer.memoryStorage({
-//   destination(req, file, callback) {
-//       callback(null, '')
-//   }
-// })
+const iconv = require('iconv-lite')
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
