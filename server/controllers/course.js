@@ -2,7 +2,7 @@ const express = require('express')
 const multer = require('multer')
 const router = express.Router()
 const { models } = require('../models')
-
+const path = require('path')
 // const storage = multer.memoryStorage({
 //   destination(req, file, callback) {
 //       callback(null, '')
@@ -56,4 +56,9 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 })
+router.get('/files/:filename', function(req, res){
+  console.log('req.params.filename', req.params.filename)
+  const file = path.resolve(__dirname, '../uploads', req.params.filename);
+  res.download(file); // Set disposition and send it.
+});
 module.exports = router

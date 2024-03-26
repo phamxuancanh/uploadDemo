@@ -1,14 +1,44 @@
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import axios from 'axios'
-
+interface Course {
+    id: number;
+    name: string;
+    prepare: string;
+    price: number;
+    file: String;
+  }
 function App() {
   const [name, setName] = useState("");
   const [prepare, setPrepare] = useState("");
   const [price, setPrice] = useState("");
   const [file, setFile] = useState<File | undefined>(undefined);
   const [msg, setMsg] = useState("");
+  const [courses, setCourses] = useState<Course[]>([]);  
+  useEffect(() => {
+    axios.get('http://localhost:4000/courses')
+      .then((response) => {
+        setCourses(response.data);
+      })
+      .catch(er => console.log(er))
+  }, []);
 
+  
+  const handleDownload = (e: React.MouseEvent<HTMLAnchorElement>, filename: string) => {
+    e.preventDefault();
+    axios({
+      url: `http://localhost:4000/courses/files/${filename}`,
+      method: 'GET',
+      responseType: 'blob', // Important
+    }).then((response) => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+    });
+  }
   const upload = () => {
     const formData = new FormData()
     formData.append("name", name);
@@ -22,6 +52,7 @@ function App() {
         console.log(response);
         if (response.status === 200) {
           setMsg("File Successfully Uploaded");
+          setCourses(prevCourses => [...prevCourses, response.data]);
         } else {
           setMsg("Error");
         }
@@ -61,6 +92,27 @@ function App() {
         <button type="button" className="btn btn-primary btn-lg" onClick={upload} style={{ marginTop: '20px' }}>Upload</button>
         <h1 style={{ fontSize: '15px', textAlign: 'center', marginTop: '20px' }}>{msg}</h1>
       </div>
+      <table className="table" border={1}>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Prepare</th>
+            <th>Price</th>
+            <th>File</th>
+          </tr>
+        </thead>
+        <tbody>
+          {courses.map((course) => (
+            <tr key={course.id}>
+              <td>{course.name}</td>
+              <td>{course.prepare}</td>
+              <td>{course.price}</td>
+              <td>{course.file}</td>
+              <td><a href="/" onClick={(e) => handleDownload(e, course.file.toString())}>Download</a></td>            
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
